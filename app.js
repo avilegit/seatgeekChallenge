@@ -3,6 +3,8 @@ var express = require('express');
 var app = express();
 var net = require('net');
 
+const commandHandler = require('./commandHandler');
+
 var server = net.createServer();
 server.on('connection', handleConnection);
 
@@ -39,68 +41,12 @@ function handleConnection(conn) {
 
 function handleRequest(action, seat)
 {
-    if (action == "QUERY") {return handleQuery(seat); }
-    else if (action == "RESERVE") { return handleReservation(seat); }
-    else if (action == "BUY") { return handlePurchase(seat); }
+    if (action == "QUERY") {return commandHandler.queryHandler(seat, seatTable); }
+    else if (action == "RESERVE") { return commandHandler.reservationHandler(seat, seatTable); }
+    else if (action == "BUY") { return commandHandler.purchaseHandler(seat, seatTable); }
     else
     {
         return "FAIL\n";
     }
 }
-
-function handleQuery(seat)
-{
-    var status = seatTable[seat]
-    if (status != null)
-    {
-        return status + "\n"
-    }
-    else
-    {
-        seatTable[seat] = "FREE"
-        return "FREE\n";
-    }
-}
-
-function handleReservation(seat)
-{
-    var status = seatTable[seat]
-    if (status != null)
-    {
-        if (status == "FREE")
-        {
-            seatTable[seat] = "RESERVED"
-            return "OK\n";
-        }
-        else 
-        {
-            return "FAIL\n";
-        }
-    }
-    else
-    {
-        return "FAIL\n";
-    }
-}
-
-function handlePurchase(seat)
-{
-    var status = seatTable[seat]
-    if (status != null)
-    {
-        if (status == "RESERVED")
-        {
-            seatTable[seat] = "SOLD"
-            return "OK\n";
-        }
-        else 
-        {
-            return "FAIL\n";
-        }
-    }
-    else
-    {
-        return "FAIL\n";
-    }
-}
-module.exports = app;
+module.exports = server;
